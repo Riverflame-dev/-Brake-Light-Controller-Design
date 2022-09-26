@@ -1,0 +1,113 @@
+----------------------------------------------------------------------------------------------------
+--  TAIL_LIGHT_CONTROLLER
+----------------------------------------------------------------------------------------------------
+library IEEE;
+use     IEEE.std_logic_1164.all;
+use     IEEE.numeric_std.all;
+
+entity TB is
+end TB;
+
+-----------------------------------
+ARCHITECTURE TAIL_LIGHT_CONTROLLER of TB is
+-----------------------------------
+  COMPONENT TAIL_LIGHT_CONTROLLER is
+    GENERIC (	DIVIDE_RATE 	: natural := 500; 				-- Master clock divide rate
+				FLASH_PERIOD 	: natural := 3000 ); 			-- Turn signal flash divide rate
+				
+    PORT    ( 	RESET : in std_logic; 						-- Active high master reset
+				CLOCK : in std_logic; 						-- Master clock
+				CTRL  : in std_logic_vector (3 downto 0); 	-- Control inputs
+				LEFT  : out std_logic; 						-- Left tail light PWM output
+				RIGHT : out std_logic; 						-- Right tail light PWM output
+				CYCLE : out std_logic ); 					-- PWM cycle indicator (for testing)
+  END COMPONENT;
+  
+	signal 	RESET :  std_logic; 						
+	signal	CLOCK :  std_logic; 						
+	signal	CTRL  :  std_logic_vector (3 downto 0); 	
+	signal	LEFT  :  std_logic; 						
+	signal	RIGHT :  std_logic; 						
+	signal	CYCLE :  std_logic ); 					
+  
+-------------------
+--  Unit Under Test
+-------------------
+
+  UUT:  DIGITAL_CLOCK
+    port map ( RESET  => RESET,
+               CLOCK  => CLOCK,
+               CTRL   => CTRL,
+               LEFT   => LEFT,
+               RIGHT  => RIGHT,
+               CYCLE  => CYCLE);
+ 
+
+ -----------------------------------------------------------------------------------------------------------
+PROCESS
+	variable LEFT_COUNT : natural := 0;
+	variable RIGHT_COUNT : natural := 0;
+	variable CYCLE_COUNT : natural := 0;
+BEGIN
+	wait until RESET = '0';
+	wait until CLOCK = '1';
+	while not DONE loop
+		wait until CLOCK = '1';
+		CYCLE_COUNT := CYCLE_COUNT + 1; 								-- Count all PWM cycles
+		if (LEFT = '1') then
+			LEFT_COUNT := LEFT_COUNT + 1; 								-- Count all high intensity PWM cycles on the LEFT output
+		END if;
+		if (RIGHT = '1') then
+			RIGHT_COUNT := RIGHT_COUNT + 1; 							-- Count all high intensity PWM cycles on the RIGHT output
+		END if;
+		if (CYCLE = '1') then 											-- Compute the intensity of each output at the end of a cycle
+			LEFT_INTENSITY <= real (LEFT_COUNT) / real (CYCLE_COUNT);
+			RIGHT_INTENSITY <= real (RIGHT_COUNT) / real (CYCLE_COUNT);
+			LEFT_COUNT := 0;
+			RIGHT_COUNT := 0;
+			CYCLE_COUNT := 0;
+		END if;
+	END loop;
+	wait;
+END PROCESS;
+
+-------------------------------------------------
+Shit we stole:
+-------------------------------------------------
+
+		for ILIGHTS in 0 to 1 loop
+			if(ILIGHTS = 0) THEN
+				PUTS ("Headlights off...");
+				HIGH := 1.0;
+				LOW  := 0.0;
+			
+			else
+				PUTS("Headlights ON...");
+				HIGH := 0.5;
+				LOW  := 0.1;
+			
+			end if;
+			
+-- All brake and turn signal combinations:
+
+		for ICTRL in 0 to 7 loop
+			CTRL <= std_logic_vector(To_Unsigned(8 * ILIGHTS + ICTRL, 4);
+			wait until CLOCK = '1';
+			
+			case CTRL(2 downto 0) is
+				when "000"  =>  PUTS("Brakes are off. No turn signals.");
+								TEST(DELAY=>2,LEFT=>LOW,RIGHT=>LOW);
+								for I in 2 to FLASH_PERIOD loop
+									TEST(DELAY => 1, LEFT => LOW, RIGHT => LOW);
+								end loop;
+				
+				when "001"  =>  PUTS("Brakes are off. Right turn signal");
+								TEST(DELAY=>2,LEFT=>LOW,RIGHT=>HIGH);
+								for I in 2 to FLASH_PERIOD loop
+									if(I <= FLASH_ON)
+									.
+									.
+									.
+									
+								end loop;
+			
